@@ -1,3 +1,26 @@
+/* Overlay cho GuideModal */
+.guide-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  animation: fadeIn 0.2s;
+}
+.guide-modal {
+  background: #fff;
+  color: #222831;
+  padding: 32px 28px 24px 28px;
+  border-radius: 18px;
+  text-align: left;
+  min-width: 320px;
+  max-width: 95vw;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+  position: relative;
+  animation: popupIn 0.25s;
+}
 .main-content {
   background: #23262b;
   border-radius: 32px;
@@ -7,60 +30,11 @@
   margin-bottom: 24px;
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: flex-start;
   justify-content: center;
-  gap: 40px;
-  width: 100%;
-  max-width: 950px;
-  box-sizing: border-box;
-
-@media (max-width: 900px) {
-  .main-content {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    max-width: 98vw;
-    padding: 18px 4vw 12px 4vw;
-    margin-top: 16px;
-    margin-bottom: 8px;
-  }
+  gap: 32px;
 }
-
-.main-content {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  justify-content: center;
-  gap: 40px;
-  width: 100%;
-  max-width: 950px;
-  margin: 0 auto 0 auto;
-  padding-bottom: 24px;
-  box-sizing: border-box;
-}
-.timer-container {
-  min-width: 320px;
-  max-width: 380px;
-  flex: 0 0 360px;
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0px;
-  position: absolute;
-  top: 32px;
-  right: 48px;
-}
-.lang-toggle {
-  display: flex;
-  background: linear-gradient(90deg, #23272f 60%, #2de1c2 100%);
-  border-radius: 24px;
-  box-shadow: 0 2px 12px #0003;
-  overflow: hidden;
-  border: 2px solid #2de1c2;
-  height: 48px;
-  min-width: 110px;
-  margin-right: 22px;
-}
+/* Sửa lại cấu trúc .main-content và .timer-container */
 .lang-switch {
   flex: 1;
   font-size: 1.18rem;
@@ -110,29 +84,17 @@
   color: #23272f;
   box-shadow: 0 4px 16px #2de1c255;
 }
-.guide-btn {
-  /* có thể thêm hiệu ứng riêng nếu muốn */
-}
-.settings-btn {
-  /* có thể thêm hiệu ứng riêng nếu muốn */
-}
-.settings-btn {
-  /* override if needed */
-}
-.guide-btn {
-  /* override if needed */
-}
-  }
-  .todo-panel, .history-panel {
-    flex: 1;
-    min-width: 0;
-    margin-bottom: 0;
-  }
+/* Xóa ruleset rỗng, nếu cần hiệu ứng riêng hãy thêm thuộc tính vào đây */
+.todo-panel, .history-panel {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 18px;
 }
 .todo-panel {
   background: #f7fafc;
   color: #222831;
   border-radius: 14px;
+  margin-top: 18px;
   margin-bottom: 18px;
   padding: 14px 18px 10px 18px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -385,7 +347,7 @@
   border-radius: 20px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.2);
   padding: 32px 24px 24px 24px;
-  margin: 24px auto 0 auto;
+  margin: 24px auto 32px auto;
   max-width: 350px;
   min-width: 260px;
 }
@@ -554,4 +516,30 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.faq-btn {
+  background: #fff;
+  color: #00bfae;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 1.35rem;
+  box-shadow: 0 2px 12px #0002;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 18px;
+  margin-right: 0;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.faq-btn:active {
+  transform: scale(0.93);
+}
+.faq-btn:hover {
+  background: #00bfae;
+  color: #fff;
+  box-shadow: 0 4px 16px #00bfae55;
 }

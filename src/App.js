@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Timer from './components/Timer';
@@ -128,26 +126,45 @@ function formatTime(seconds) {
 
 
 function App() {
-  // Ngôn ngữ
+  // State khai báo đầu tiên
   const [lang, setLang] = useState('vi');
-  const t = LANGS[lang];
-  // Xin quyền notification khi vào app
-  useEffect(() => {
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-    }
-  }, []);
-  // Todo-list state
   const [todos, setTodos] = useState(() => {
     const data = localStorage.getItem('pomofocus_todos');
     return data ? JSON.parse(data) : [];
   });
   const [todoInput, setTodoInput] = useState('');
-  // Lưu todo-list vào localStorage khi thay đổi
+  const [workDuration, setWorkDuration] = useState(DEFAULT_WORK_DURATION);
+  const [shortBreak, setShortBreak] = useState(DEFAULT_SHORT_BREAK);
+  const [longBreak, setLongBreak] = useState(DEFAULT_LONG_BREAK);
+  const [autoNext, setAutoNext] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  const [mode, setMode] = useState('work'); // work, short, long
+  const [secondsLeft, setSecondsLeft] = useState(workDuration);
+  // Bổ sung các state và ref còn thiếu
+  const [isRunning, setIsRunning] = useState(false);
+  const [sessionCount, setSessionCount] = useState(0);
+  // Cập nhật title theo thời gian thực (đặt sau khi đã khai báo state)
   useEffect(() => {
-    localStorage.setItem('pomofocus_todos', JSON.stringify(todos));
-  }, [todos]);
-  // Thêm công việc
+    let title = '';
+    if (mode === 'work') {
+      title = `${formatTime(secondsLeft)} - Time to focus!`;
+    } else if (mode === 'short') {
+      title = `${formatTime(secondsLeft)} - Short break!`;
+    } else {
+      title = `${formatTime(secondsLeft)} - Long break!`;
+    }
+    document.title = title;
+  }, [secondsLeft, mode]);
+  const [endTime, setEndTime] = useState(null); // timestamp ms
+  const [history, setHistory] = useState(() => {
+    const data = localStorage.getItem('pomofocus_history');
+    return data ? JSON.parse(data) : {};
+  });
+  const [showEyePopup, setShowEyePopup] = useState(false);
+  const timerRef = useRef();
+
+  // Các hàm xử lý todo
   const handleAddTodo = (e) => {
     e.preventDefault();
     const value = todoInput.trim();
@@ -156,35 +173,25 @@ function App() {
     setTodoInput('');
   };
 
-  // Đánh dấu hoàn thành
   const toggleTodo = (id) => {
     setTodos(todos.map(todo => todo.id === id ? { ...todo, done: !todo.done } : todo));
   };
 
-  // Xoá công việc
   const deleteTodo = (id) => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
-  // Timer settings
-  const [workDuration, setWorkDuration] = useState(DEFAULT_WORK_DURATION);
-  const [shortBreak, setShortBreak] = useState(DEFAULT_SHORT_BREAK);
-  const [longBreak, setLongBreak] = useState(DEFAULT_LONG_BREAK);
-  const [autoNext, setAutoNext] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
 
-  // Timer state
-  const [mode, setMode] = useState('work'); // work, short, long
-  const [secondsLeft, setSecondsLeft] = useState(workDuration);
-  const [isRunning, setIsRunning] = useState(false);
-  const [sessionCount, setSessionCount] = useState(0);
-  const [history, setHistory] = useState(() => {
-    // Lấy lịch sử từ localStorage
-    const data = localStorage.getItem('pomofocus_history');
-    return data ? JSON.parse(data) : {};
-  });
-  const [showEyePopup, setShowEyePopup] = useState(false);
-  const timerRef = useRef();
+  const t = LANGS[lang];
+  // Xin quyền notification khi vào app
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+  // Lưu todo-list vào localStorage khi thay đổi
+  useEffect(() => {
+    localStorage.setItem('pomofocus_todos', JSON.stringify(todos));
+  }, [todos]);
 
 
   // Lưu lịch sử khi sessionCount thay đổi
@@ -237,20 +244,43 @@ function App() {
     // eslint-disable-next-line
   }, [workDuration, shortBreak, longBreak]);
 
-  // Timer interval
+
+  // Timer interval - dùng timestamp thực tế
   useEffect(() => {
     if (!isRunning) return;
+    if (!endTime) return;
     timerRef.current = setInterval(() => {
-      setSecondsLeft((sec) => {
-        if (sec > 1) return sec - 1;
+      const now = Date.now();
+      const remain = Math.max(0, Math.round((endTime - now) / 1000));
+      setSecondsLeft(remain);
+      if (remain <= 0) {
         clearInterval(timerRef.current);
         handleTimerEnd();
-        return 0;
-      });
+      }
     }, 1000);
     return () => clearInterval(timerRef.current);
     // eslint-disable-next-line
-  }, [isRunning, mode, workDuration, shortBreak, longBreak]);
+  }, [isRunning, endTime]);
+
+  // Khi start timer, set endTime
+  useEffect(() => {
+    if (isRunning) {
+      setEndTime(Date.now() + secondsLeft * 1000);
+    } else {
+      setEndTime(null);
+    }
+    // eslint-disable-next-line
+  }, [isRunning]);
+
+  // Khi đổi mode hoặc durations, reset secondsLeft và endTime
+  useEffect(() => {
+    if (mode === 'work') setSecondsLeft(workDuration);
+    else if (mode === 'short') setSecondsLeft(shortBreak);
+    else setSecondsLeft(longBreak);
+    setIsRunning(false);
+    setEndTime(null);
+    // eslint-disable-next-line
+  }, [workDuration, shortBreak, longBreak, mode]);
 
 
   const sendNotification = (title, body) => {
@@ -307,18 +337,29 @@ function App() {
   const closeEyePopup = () => setShowEyePopup(false);
 
   // Optional: Play sound when showEyePopup
-  useEffect(() => {
-    if (showEyePopup) {
-      const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfa1c7b.mp3');
-      audio.play();
-    }
-  }, [showEyePopup]);
+useEffect(() => {
+  if (showEyePopup) {
+    const audio = new Audio('https://cdn.jsdelivr.net/gh/napthedev/pomofocus-assets@main/sounds/notification.mp3');
+    audio.play().catch((e) => {
+      // Nếu lỗi, không làm crash app
+      console.warn('Cannot play audio:', e);
+    });
+  }
+}, [showEyePopup]);
 
   return (
     <div className="App">
       <header className="App-header">
         <h1 className="main-title">Pomofocus <span className="eyecare">EyeCare</span></h1>
         <Header lang={lang} setLang={setLang} t={t} setShowGuide={setShowGuide} setShowSettings={setShowSettings} />
+        <button
+          className="faq-btn"
+          title={t.guideTitle}
+          style={{ position: 'absolute', top: 32, right: 100, zIndex: 1102 }}
+          onClick={() => setShowGuide(true)}
+        >
+          ?
+        </button>
         <div className="main-content">
           <Timer
             mode={mode}

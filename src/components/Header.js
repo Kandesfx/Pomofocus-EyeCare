@@ -16,9 +16,6 @@ export default function Header({ lang, setLang, t, setShowGuide, setShowSettings
           aria-label="English"
         >EN</button>
       </div>
-      <button className="icon-btn guide-btn" onClick={() => setShowGuide(true)} title={t.guide}>
-        <FiHelpCircle size={26} />
-      </button>
       <button className="icon-btn settings-btn" onClick={() => setShowSettings(true)} title={t.settings}>
         <FiSettings size={26} />
       </button>

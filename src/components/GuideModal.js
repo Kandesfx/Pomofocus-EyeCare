@@ -2,8 +2,8 @@ import React from 'react';
 
 export default function GuideModal({ t, lang, setShowGuide }) {
   return (
-    <div className="guide-popup-overlay" onClick={e => {if(e.target.className==='guide-popup-overlay') setShowGuide(false)}}>
-      <div className="guide-popup">
+    <div className="guide-modal-overlay" onClick={e => {if(e.target.className==='guide-modal-overlay') setShowGuide(false)}}>
+      <div className="guide-modal">
         <h2>{t.guideTitle}</h2>
         <ul className="guide-list">
           <li><b>Pomodoro:</b> {lang==='vi'? 'Làm việc tập trung 25 phút, sau đó nghỉ ngắn 5 phút. Sau 4 phiên, nghỉ dài 15 phút.' : 'Focus for 25 minutes, then take a 5-minute break. After 4 sessions, take a 15-minute long break.'}</li>
